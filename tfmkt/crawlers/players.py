@@ -13,7 +13,27 @@ logger = logging.getLogger(__name__)
 async def run(parents_arg=None, season=2024, base_url=None):
     base_url = base_url or DEFAULT_BASE_URL
     parents = load_parents(parents_arg)
-    requests = build_initial_requests(parents, season, base_url, label='parse', spider_name='players')
+
+    # Containers (club / national_team / ...) are parsed as squad list pages to
+    # discover their players. Items that are already `player` (e.g. emitted by
+    # the `agents` crawler) point directly at a profile page and go straight to
+    # `parse_details`.
+    list_parents = [p for p in parents if p.get('type') != 'player']
+    player_parents = [p for p in parents if p.get('type') == 'player']
+
+    requests = build_initial_requests(list_parents, season, base_url, label='parse', spider_name='players')
+    for item in player_parents:
+        requests.append(
+            Request.from_url(
+                url=base_url + item['href'],
+                label='parse_details',
+                user_data={'base': {
+                    'type': 'player',
+                    'href': item['href'],
+                    'parent': item.get('parent'),
+                }},
+            )
+        )
 
     crawler, failures = create_crawler()
 

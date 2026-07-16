@@ -5,3 +5,30 @@ __pycache__
 .pytest_cache
 
 storage
+
+# generated data files
+mv_players.json
+mv_coaches.json
+mv_players_rich.json
+mv_coaches_rich.json
+players.json
+
+# generated output
+demo.html
+sampaoli.html
+
+# logs
+*_err.log
+
+# downloaded images (binary, large)
+images/
+
+# website repo structure (not part of scraper)
+spec/
+src/
+
+# internal docs / dev artifacts
+DATA_FILES.md
+FRONT_CHANGES.md
+datos-jugadores.md
+SKILL*.md

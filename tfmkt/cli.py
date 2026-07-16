@@ -3,11 +3,15 @@ import asyncio
 import importlib
 
 CRAWLER_MODULES = {
+    'agents': 'tfmkt.crawlers.agents',
+    'coaches': 'tfmkt.crawlers.coaches',
+    'coaches_full': 'tfmkt.crawlers.coaches_full',
     'confederations': 'tfmkt.crawlers.confederations',
     'competitions': 'tfmkt.crawlers.competitions',
     'countries': 'tfmkt.crawlers.countries',
     'clubs': 'tfmkt.crawlers.clubs',
     'players': 'tfmkt.crawlers.players',
+    'players_full': 'tfmkt.crawlers.players_full',
     'national_teams': 'tfmkt.crawlers.national_teams',
     'appearances': 'tfmkt.crawlers.appearances',
     'tournament_editions': 'tfmkt.crawlers.tournament_editions',

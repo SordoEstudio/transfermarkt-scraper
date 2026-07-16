@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MV Sports Agency — Jugadores</title>
+<style>
+  :root{
+    --bg:#0e1116; --card:#171c24; --line:#262d39; --txt:#e6e9ee;
+    --muted:#8b95a5; --accent:#3ea6ff; --green:#37d67a; --chip:#1f2733; --gold:#e8c95a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;}
+  header{padding:26px 20px 6px;max-width:1280px;margin:0 auto}
+  h1{margin:0;font-size:1.5rem}
+  .sub{color:var(--muted);margin:4px 0 16px;font-size:.9rem}
+  .bar{max-width:1280px;margin:0 auto;padding:0 20px 18px;
+    display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  input{background:var(--card);border:1px solid var(--line);color:var(--txt);
+    padding:10px 14px;border-radius:10px;font-size:.95rem;min-width:240px;flex:1}
+  .count{color:var(--muted);font-size:.85rem;white-space:nowrap}
+  .grid{max-width:1280px;margin:0 auto;padding:0 20px 40px;
+    display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+    overflow:hidden;display:flex;flex-direction:column;cursor:pointer;transition:.15s border-color}
+  .card:hover{border-color:var(--accent)}
+  .top{display:flex;gap:12px;padding:14px}
+  .pic{width:62px;height:62px;border-radius:50%;object-fit:cover;
+    background:var(--chip);flex:none;border:1px solid var(--line)}
+  .name{font-weight:600;font-size:1.02rem;line-height:1.15}
+  .pos{color:var(--accent);font-size:.8rem;margin-top:3px}
+  .mv{margin-left:auto;text-align:right;flex:none}
+  .mv b{color:var(--green);font-size:.95rem}
+  .mv span{display:block;color:var(--muted);font-size:.65rem}
+  .totals{display:flex;gap:0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .totals div{flex:1;text-align:center;padding:9px 4px}
+  .totals b{display:block;font-size:1.05rem}
+  .totals span{color:var(--muted);font-size:.66rem;text-transform:uppercase;letter-spacing:.04em}
+  .meta{padding:11px 14px;display:grid;grid-template-columns:auto 1fr;gap:5px 10px;font-size:.8rem}
+  .meta .k{color:var(--muted)}
+  .meta .v{text-align:right}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;padding:0 14px 14px}
+  .chip{background:var(--chip);border:1px solid var(--line);border-radius:999px;
+    padding:3px 9px;font-size:.7rem;color:var(--muted)}
+  .chip.gold{color:var(--gold);border-color:#4a4226}
+  a.lnk{color:var(--txt);text-decoration:none;border-bottom:1px dotted var(--muted)}
+  /* filters + category badges */
+  .filters{display:flex;gap:8px;flex-wrap:wrap}
+  .fbtn{background:var(--card);border:1px solid var(--line);color:var(--muted);
+    padding:8px 14px;border-radius:999px;font-size:.85rem;cursor:pointer;transition:.15s}
+  .fbtn:hover{border-color:var(--accent);color:var(--txt)}
+  .fbtn.on{background:var(--accent);border-color:var(--accent);color:#06121f;font-weight:600}
+  .badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:.66rem;
+    font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+  .badge.youth{background:#23351f;color:var(--green);border:1px solid #2f5a2a}
+  .badge.pro{background:#1d2a3a;color:var(--accent);border:1px solid #28415e}
+  .badge.coach{background:#352a1d;color:var(--gold);border:1px solid #5a4a26}
+  .cardbadge{position:absolute;top:10px;right:10px}
+  .card{position:relative}
+  /* modal */
+  .ov{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;
+    align-items:flex-start;justify-content:center;padding:30px 16px;overflow:auto;z-index:9}
+  .ov.show{display:flex}
+  .modal{background:var(--card);border:1px solid var(--line);border-radius:16px;
+    max-width:820px;width:100%;}
+  .mhead{display:flex;gap:16px;padding:18px;border-bottom:1px solid var(--line);align-items:center}
+  .mhead img{width:80px;height:80px;border-radius:50%;object-fit:cover;border:1px solid var(--line)}
+  .mhead h2{margin:0;font-size:1.3rem}
+  .mhead .x{margin-left:auto;cursor:pointer;color:var(--muted);font-size:1.6rem;line-height:1;border:none;background:none}
+  .mbody{padding:18px;display:grid;gap:20px}
+  .sec h3{margin:0 0 8px;font-size:.95rem;color:var(--accent)}
+  table{width:100%;border-collapse:collapse;font-size:.8rem}
+  th,td{padding:6px 8px;text-align:right;border-bottom:1px solid var(--line)}
+  th:first-child,td:first-child{text-align:left}
+  thead th{color:var(--muted);font-weight:500;font-size:.72rem;text-transform:uppercase}
+  .bio{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px 16px;font-size:.82rem}
+  .bio div span{color:var(--muted)}
+  .empty{color:var(--muted);font-size:.8rem}
+  .clublogo{height:16px;width:16px;object-fit:contain;vertical-align:-3px;margin-right:5px}
+  .timeline{display:flex;flex-direction:column;gap:0}
+  .tl{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line)}
+  .tl img{height:26px;width:26px;object-fit:contain;flex:none}
+  .tl .d{color:var(--muted);font-size:.74rem;margin-left:auto}
+  .gallery{display:flex;gap:8px;flex-wrap:wrap}
+  .gallery a{font-size:.74rem;color:var(--accent);text-decoration:none;border:1px solid var(--line);padding:3px 8px;border-radius:8px}
+  .gthumbs{display:flex;gap:8px;flex-wrap:wrap}
+  .gthumb{height:90px;width:auto;border-radius:8px;border:1px solid var(--line);object-fit:cover}
+</style>
+</head>
+<body>
+<header>
+  <h1>MV Sports Agency</h1>
+  <div class="sub">Demo · perfil + valor + estadísticas + transferencias + lesiones · datos de Transfermarkt</div>
+</header>
+<div class="bar">
+  <input id="q" placeholder="Buscar nombre, club, posición, nacionalidad…">
+  <span class="count" id="count"></span>
+</div>
+<div class="bar filters" id="filters">
+  <button class="fbtn on" data-f="all">Todos</button>
+  <button class="fbtn" data-f="youth">Juveniles</button>
+  <button class="fbtn" data-f="professional">Profesionales</button>
+  <button class="fbtn" data-f="coach">Técnicos</button>
+</div>
+<div class="grid" id="grid"></div>
+
+<div class="ov" id="ov"><div class="modal" id="modal"></div></div>
+
+<script>
+const DATA = /*__DATA__*/[]/*__END__*/;
+DATA.forEach((p,i)=>p._i=i);
+
+const C=s=>(s==null?'':(''+s)).replace(/ /g,' ').trim();
+const clubName=c=>c&&(c.name||(c.href?c.href.replace(/^\//,'').split('/')[0].replace(/-/g,' '):''))||'—';
+const tm=h=>h?'https://www.transfermarkt.co.uk'+h:'#';
+const SEASON=s=>{const a=(s+'').slice(-2);const b=((+s+1)+'').slice(-2);return a+'/'+b;};
+const num=n=>(n||0).toLocaleString('es');
+
+const catBadge=p=>p.category==='youth'?'<span class="badge youth">Juvenil</span>'
+  :p.category==='professional'?'<span class="badge pro">Profesional</span>':'';
+
+function card(p){
+  if(p._kind==='coach') return coachCard(p);
+  const ct=p.career_totals||{};
+  const others=(p.other_positions||[]).join(', ');
+  return `<div class="card" onclick="open_(${p._i})">
+    ${p.category?`<div class="cardbadge">${catBadge(p)}</div>`:''}
+    <div class="top">
+      <img class="pic" loading="lazy" src="${p.image_url||''}" onerror="this.style.visibility='hidden'">
+      <div>
+        <div class="name">${C(p.name)} ${C(p.last_name)}</div>
+        <div class="pos">${C(p.main_position)||C(p.position)||'—'}</div>
+        ${others?`<div style="color:var(--muted);font-size:.7rem;margin-top:2px">+ ${others}</div>`:''}
+      </div>
+      <div class="mv">${p.current_market_value?`<b>${C(p.current_market_value)}</b><span>valor</span>`:''}</div>
+    </div>
+    <div class="totals">
+      <div><b>${num(ct.appearances)}</b><span>Part.</span></div>
+      <div><b>${num(ct.goals)}</b><span>Goles</span></div>
+      <div><b>${num(ct.assists)}</b><span>Asist.</span></div>
+    </div>
+    <div class="meta">
+      <span class="k">Edad</span><span class="v">${C(p.age)||'—'}</span>
+      <span class="k">Nacionalidad</span><span class="v">${C(p.citizenship)||'—'}</span>
+      <span class="k">Club</span><span class="v">${(p.current_club&&p.current_club.logo_url)?`<img class="clublogo" src="${p.current_club.logo_url}" onerror="this.style.display='none'">`:''}${clubName(p.current_club)}</span>
+      <span class="k">Contrato</span><span class="v">${C(p.contract_expires)||'—'}</span>
+    </div>
+    <div class="chips">
+      ${(p.achievements||[]).slice(0,2).map(a=>`<span class="chip gold">🏆 ${C(a)}</span>`).join('')}
+      ${(p.injuries||[]).length?`<span class="chip">🩹 ${p.injuries.length} lesiones</span>`:''}
+    </div>
+  </div>`;
+}
+
+function statsTable(rows){
+  if(!rows||!rows.length) return '<div class="empty">Sin datos</div>';
+  return `<table><thead><tr><th>Temporada</th><th>Part.</th><th>Goles</th><th>Asist.</th><th>Min.</th><th>Amar.</th></tr></thead><tbody>${
+    rows.map(s=>`<tr><td>${SEASON(s.season_id)}</td><td>${s.appearances}</td><td>${s.goals}</td><td>${s.assists}</td><td>${num(s.minutes)}</td><td>${s.yellow_cards}</td></tr>`).join('')
+  }</tbody></table>`;
+}
+function transfersTable(rows){
+  if(!rows||!rows.length) return '<div class="empty">Sin transferencias</div>';
+  return `<table><thead><tr><th>Fecha</th><th>De</th><th>A</th><th>Valor</th><th>Costo</th></tr></thead><tbody>${
+    rows.map(t=>`<tr><td>${C(t.date)}${t.upcoming?' ⏩':''}</td><td>${clubName(t.from)}</td><td>${clubName(t.to)}</td><td>${C(t.market_value)}</td><td>${C(t.fee)}</td></tr>`).join('')
+  }</tbody></table>`;
+}
+function timeline(rows){
+  if(!rows||!rows.length) return '<div class="empty">Sin historial</div>';
+  return `<div class="timeline">${rows.slice().reverse().map(c=>
+    `<div class="tl"><img src="${c.logo_url||''}" onerror="this.style.visibility='hidden'"><b>${clubName(c)}</b><span class="d">desde ${C(c.joined)} · ${C(c.season)}</span></div>`
+  ).join('')}</div>`;
+}
+function gallery(p){
+  const imgs=p.gallery||[];
+  const thumbs=imgs.map(g=>`<a href="${g.url}" target="_blank" title="${C(g.title)}"><img class="gthumb" src="${g.url}" loading="lazy" onerror="this.parentNode.style.display='none'"></a>`).join('');
+  const v=p.image_urls||{};
+  const sizes=Object.entries(v).map(([k,u])=>`<a href="${u}" target="_blank">${k}</a>`).join('');
+  return `${imgs.length?`<div class="gthumbs">${thumbs}</div>`:'<div class="empty">Sin galería de fotos</div>'}
+    <div class="gallery" style="margin-top:8px">Retrato: ${sizes}</div>`;
+}
+function injuriesTable(rows){
+  if(!rows||!rows.length) return '<div class="empty">Sin lesiones registradas</div>';
+  return `<table><thead><tr><th>Temporada</th><th>Lesión</th><th>Desde</th><th>Hasta</th><th>Días</th></tr></thead><tbody>${
+    rows.map(i=>`<tr><td>${C(i.season)}</td><td>${C(i.injury)}</td><td>${C(i.from)}</td><td>${C(i.until)}</td><td>${C(i.days)}</td></tr>`).join('')
+  }</tbody></table>`;
+}
+
+function coachCard(c){
+  return `<div class="card" onclick="open_(${c._i})">
+    <div class="cardbadge"><span class="badge coach">Técnico</span></div>
+    <div class="top">
+      <img class="pic" loading="lazy" src="${c.image_url||''}" onerror="this.style.visibility='hidden'">
+      <div>
+        <div class="name">${C(c.name)}</div>
+        <div class="pos">${C(c.role)||'Entrenador'}</div>
+      </div>
+    </div>
+    <div class="meta">
+      <span class="k">Edad</span><span class="v">${C(c.age)||'—'}</span>
+      <span class="k">Nacionalidad</span><span class="v">${C(c.citizenship)||'—'}</span>
+      <span class="k">Club</span><span class="v">${(c.current_club&&c.current_club.logo_url)?`<img class="clublogo" src="${c.current_club.logo_url}" onerror="this.style.display='none'">`:''}${clubName(c.current_club)}</span>
+      <span class="k">Contrato</span><span class="v">${C(c.contract_expires)||'—'}</span>
+    </div>
+    <div class="chips">
+      ${c.preferred_formation?`<span class="chip">🎯 ${C(c.preferred_formation)}</span>`:''}
+      ${c.coaching_licence?`<span class="chip gold">🎓 ${C(c.coaching_licence)}</span>`:''}
+    </div>
+  </div>`;
+}
+function stationsTable(rows){
+  if(!rows||!rows.length) return '<div class="empty">Sin historial</div>';
+  return `<div class="timeline">${rows.map(s=>
+    `<div class="tl"><img src="${(s.club&&s.club.logo_url)||''}" onerror="this.style.visibility='hidden'"><b>${clubName(s.club)}</b><span class="d">${(s.details||[]).map(C).join(' · ')}</span></div>`
+  ).join('')}</div>`;
+}
+function openCoach(c){
+  const bio=[['Nombre completo',c.name],['Nacimiento',c.date_of_birth],['Lugar',(c.place_of_birth||{}).city],
+    ['Nacionalidad',c.citizenship],['Rol',c.role],['Club',clubName(c.current_club)],['Liga',c.current_league],
+    ['Designado',c.appointed],['Contrato',c.contract_expires],['Licencia',c.coaching_licence],
+    ['Formación preferida',c.preferred_formation],['Permanencia media',c.avg_term_as_coach]]
+    .filter(x=>x[1]).map(x=>`<div><span>${x[0]}:</span> ${C(x[1])}</div>`).join('');
+  document.getElementById('modal').innerHTML=`
+    <div class="mhead">
+      <img src="${(c.image_urls&&c.image_urls.header)||c.image_url||''}" onerror="this.style.visibility='hidden'">
+      <div><h2>${C(c.name)}</h2><div class="pos">${C(c.role)||'Entrenador'} · Técnico</div></div>
+      <button class="x" onclick="close_()">×</button>
+    </div>
+    <div class="mbody">
+      <div class="sec"><h3>Datos</h3><div class="bio">${bio}</div></div>
+      <div class="sec"><h3>Trayectoria como entrenador</h3>${stationsTable(c.stations)}</div>
+    </div>`;
+  document.getElementById('ov').classList.add('show');
+}
+function open_(i){
+  const p=DATA[i];
+  if(p._kind==='coach') return openCoach(p);
+  const bio=[['Nombre completo',p.full_name],['Nacimiento',p.date_of_birth],['Lugar',(p.place_of_birth||{}).city],
+    ['Altura',p.height],['Pie',p.foot],['Posición',p.position],['Club',clubName(p.current_club)],
+    ['Fichado',p.joined],['Contrato',p.contract_expires],['Últ. extensión',p.last_contract_extension],
+    ['Valor',p.current_market_value],['Agente',(p.player_agent||{}).name],
+    ['Selección',(p.national_team||{}).country],['Caps/Goles',p.international_caps?p.international_caps+' / '+p.international_goals:null]]
+    .filter(x=>x[1]).map(x=>`<div><span>${x[0]}:</span> ${C(x[1])}</div>`).join('');
+  document.getElementById('modal').innerHTML=`
+    <div class="mhead">
+      <img src="${(p.image_urls&&p.image_urls.header)||p.image_url||''}" onerror="this.style.visibility='hidden'">
+      <div><h2>${C(p.name)} ${C(p.last_name)}</h2>
+        <div class="pos">${C(p.main_position)||C(p.position)||''} ${(p.other_positions||[]).length?'· '+p.other_positions.join(', '):''}</div></div>
+      <button class="x" onclick="close_()">×</button>
+    </div>
+    <div class="mbody">
+      <div class="sec"><h3>Datos</h3><div class="bio">${bio}</div></div>
+      ${(p.achievements||[]).length?`<div class="sec"><h3>Títulos</h3><div class="chips">${p.achievements.map(a=>`<span class="chip gold">🏆 ${C(a)}</span>`).join('')}</div></div>`:''}
+      <div class="sec"><h3>Trayectoria de clubes</h3>${timeline(p.clubs_history)}</div>
+      <div class="sec"><h3>Rendimiento por temporada</h3>${statsTable(p.stats_by_season)}</div>
+      <div class="sec"><h3>Transferencias ${p.transfer_fee_sum?'· total '+C(p.transfer_fee_sum):''}</h3>${transfersTable(p.transfers)}</div>
+      <div class="sec"><h3>Lesiones</h3>${injuriesTable(p.injuries)}</div>
+      <div class="sec"><h3>Fotos (resoluciones)</h3>${gallery(p)}</div>
+    </div>`;
+  document.getElementById('ov').classList.add('show');
+}
+function close_(){document.getElementById('ov').classList.remove('show');}
+document.getElementById('ov').addEventListener('click',e=>{if(e.target.id==='ov')close_();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')close_();});
+
+const grid=document.getElementById('grid'),count=document.getElementById('count'),q=document.getElementById('q');
+function render(list){grid.innerHTML=list.map(card).join('');count.textContent=list.length+' / '+DATA.length+' fichas';}
+const hay=p=>[p.name,p.last_name,p.main_position,p.position,p.role,p.citizenship,clubName(p.current_club)].map(C).join(' ').toLowerCase();
+let curF='all';
+const matchF=p=>curF==='all'?true:curF==='coach'?p._kind==='coach':(p._kind!=='coach'&&p.category===curF);
+function apply(){
+  const t=q.value.toLowerCase().trim();
+  render(DATA.filter(p=>matchF(p)&&(!t||hay(p).includes(t))));
+}
+q.addEventListener('input',apply);
+document.getElementById('filters').addEventListener('click',e=>{
+  const b=e.target.closest('.fbtn'); if(!b)return;
+  curF=b.dataset.f;
+  document.querySelectorAll('.fbtn').forEach(x=>x.classList.toggle('on',x===b));
+  apply();
+});
+render(DATA);
+</script>
+</body>
+</html>
