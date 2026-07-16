@@ -8,7 +8,6 @@ them into a single rich JSON record:
   - performance-game API   -> per-season aggregated stats + career totals
   - injuries page          -> injury history
   - erfolge page           -> honours / palmarés ([{title, count}])
-  - gallery API            -> action photos
 
 Input (one JSON object per line):
     {"type":"player","href":"/gabriel-rojas/profil/spieler/471639"}
@@ -334,8 +333,6 @@ async def run(parents_arg=None, season=2024, base_url=None):
                              label='injuries', user_data={'pid': pid}),
             Request.from_url(base_url + href.replace('/profil/', '/erfolge/'),
                              label='erfolge', user_data={'pid': pid}),
-            Request.from_url(f"https://tmapi.transfermarkt.technology/player/{pid}/gallery",
-                             label='gallery', user_data={'pid': pid}),
         ]
 
     failures = []
@@ -405,17 +402,6 @@ async def run(parents_arg=None, season=2024, base_url=None):
     @crawler.router.handler('erfolge')
     async def erfolge(context):
         acc[context.request.user_data['pid']]['achievements'] = parse_erfolge(context.selector)
-
-    @crawler.router.handler('gallery')
-    async def gallery(context):
-        body = await context.http_response.read()
-        data = json.loads(body)
-        images = (data.get('data') or {}).get('images', []) if data.get('success') else []
-        acc[context.request.user_data['pid']]['gallery'] = [
-            {'title': img.get('title'), 'url': img.get('url'),
-             'source': img.get('source'), 'premium': img.get('isPremium')}
-            for img in images
-        ]
 
     await crawler.run(requests)
 

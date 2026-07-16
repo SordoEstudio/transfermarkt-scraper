@@ -60,19 +60,12 @@ const MOCK = {
 // ── Players (dataset enriquecido) ────────────────────────────
 const players = JSON.parse(fs.readFileSync('spec/players.json', 'utf8'));
 
-// Backfill desde el scraper raw (no están en el enriquecido): nº camiseta y galería.
-// Normalizadores compartidos jugadores↔técnicos (mismo shape en el raw).
-// NOTA licencia: casi toda la galería es IMAGO `premium:true`. Se importa igual (el cliente
-// quiere mostrarla); si hay que gatear por derechos, filtrar aquí por `!g.premium`.
-const normGallery = (arr) => arr
-  .filter((g) => g && g.url)
-  .map((g) => ({ url: g.url, title: g.title ?? '', source: g.source ?? '' }));
+// Backfill desde el scraper raw (no están en el enriquecido): nº camiseta, logros, bandera.
 const normAchievements = (arr) => arr
   .filter((a) => a && a.title)
   .map((a) => ({ title: a.title, count: Number(a.count) || 1 }));
 
 const shirtByCode = {};
-const galleryByCode = {};
 const achByCode = {};
 const natFlagByCode = {};
 if (fs.existsSync('mv_players_rich.json')) {
@@ -80,9 +73,6 @@ if (fs.existsSync('mv_players_rich.json')) {
     if (!r.code) continue;
     const n = parseInt(String(r.shirt_number ?? '').replace(/[^\d]/g, ''), 10);
     if (Number.isFinite(n)) shirtByCode[r.code] = n;
-    if (Array.isArray(r.gallery) && r.gallery.length) {
-      galleryByCode[r.code] = normGallery(r.gallery);
-    }
     if (Array.isArray(r.achievements) && r.achievements.length) {
       achByCode[r.code] = normAchievements(r.achievements);
     }
@@ -134,7 +124,6 @@ for (const p of players) {
   const rec = sinClub({
     ...p,
     ...(shirtByCode[p.slug] != null ? { shirtNumber: shirtByCode[p.slug] } : {}),
-    ...(galleryByCode[p.slug] ? { gallery: galleryByCode[p.slug] } : {}),
     ...(achByCode[p.slug] ? { achievements: achByCode[p.slug] } : {}),
     ...(natFlagByCode[p.slug] ? { nationalTeamFlag: natFlagByCode[p.slug] } : {}),
     featured: featured.has(p.slug),
@@ -166,8 +155,6 @@ wipeJson(cdir);
 for (const c of coaches) {
   const rec = sinClub({
     ...c,
-    // Galería + palmarés reales (mismo shape que jugadores).
-    ...(Array.isArray(c.gallery) && c.gallery.length ? { gallery: normGallery(c.gallery) } : {}),
     ...(Array.isArray(c.achievements) && c.achievements.length ? { achievements: normAchievements(c.achievements) } : {}),
     featured: COACH_FEATURED.has(c.code),
     active: true,

@@ -3,7 +3,7 @@
 For every input `coach` item it fetches the Transfermarkt trainer sources and
 merges them into a single rich JSON record:
 
-  - profile page    -> bio, role, contract, coaching licence, preferred formation, gallery
+  - profile page    -> bio, role, contract, coaching licence, preferred formation
   - stations page   -> coaching history (clubs managed, as player and as coach)
   - erfolge page    -> honours / palmarés ([{title, count}])
 
@@ -180,30 +180,6 @@ def _foto_title(url):
     return fn.replace('-', ' ').strip().title() or None
 
 
-def parse_gallery(sel):
-    """Trainer press-photo slider (`ul.premiumfotoSlider`).
-
-    Unlike players (whose gallery comes from the tmapi /gallery endpoint), coaches
-    have no gallery API/tab. Their photos live inline on the profile as CSS
-    background-images inside the premium foto slider. All are IMAGO/premium.
-    """
-    out = []
-    seen = set()
-    for li in sel.css('ul.premiumfotoSlider li'):
-        style = li.css('.premium-profil-foto::attr(style)').get() or ''
-        m = re.search(r'url\((.*?)\)', style)
-        if not m:
-            continue
-        url = m.group(1).strip('\'"')
-        if not url or url in seen:
-            continue
-        seen.add(url)
-        source = ' '.join(t.strip() for t in li.css('::text').getall() if t.strip()) or None
-        out.append({'title': _foto_title(url), 'url': url,
-                    'source': source, 'premium': True})
-    return out
-
-
 def parse_erfolge(sel):
     """Honours from the `erfolge` tab (same layout for trainers and players).
 
@@ -296,7 +272,6 @@ async def run(parents_arg=None, season=2024, base_url=None):
     async def profile(context):
         ud = context.request.user_data
         acc[ud['cid']].update(parse_profile(context.selector, ud['href']))
-        acc[ud['cid']]['gallery'] = parse_gallery(context.selector)
 
     @crawler.router.handler('stations')
     async def stations(context):
